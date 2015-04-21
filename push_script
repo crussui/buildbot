@@ -1,0 +1,8 @@
+#!/bin/bash
+# push_script
+file=(/home/buildmaster/master/slave_master/get_jobs/build/*)
+if [ $file != '/home/buildmaster/master/slave_master/get_jobs/build/*' ]
+	then	
+		mv $file /home/buildmaster/master/slave_master/push_job/ini
+	else	rm /home/buildmaster/master/slave_master/push_job/ini
+fi
