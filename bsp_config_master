@@ -1,6 +1,6 @@
 # -*- python -*-
 # ex: set syntax=python:
-
+# 'master.cfg'
 from buildbot.plugins import *
 
 import configuration
