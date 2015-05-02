@@ -1,7 +1,6 @@
 # -*- python -*-
 # ex: set syntax=python:
-
-
+# 'configuration.py'
 # this is the preconfiguration file for the main configuration file 'master.cfg'
 
 SourceUrl = 'git://github.com/crussui/source.git'
