@@ -1,0 +1,32 @@
+# -*- python -*-
+# ex: set syntax=python:
+
+from buildbot.plugins import *
+
+import configuration
+
+# master config object
+c = BuildmasterConfig = {}
+
+# buildslaves
+c['slaves'] = []
+for var in configuration.ListOfSlaves[0::2]:
+  c['slaves'].append(buildslave.BuildSlave(var[0],var[1]))
+
+SlaveNameList_matlab_2014b = []
+for var_name, var_compiler in zip(configuration.ListOfSlaves[0::2], configuration.ListOfSlaves[1::2]):
+  for var in var_compiler[:]:
+    if var == 'matlab_2014b':
+      SlaveNameList_matlab_2014b.append(var_name[0])
+
+SlaveNameList_gcc = []
+for var_name, var_compiler in zip(configuration.ListOfSlaves[0::2], configuration.ListOfSlaves[1::2]):
+  for var in var_compiler[:]:
+    if var == 'gcc':
+      SlaveNameList_gcc.append(var_name[0])
+
+SlaveNameList_visualstudio_2013 = []
+for var_name, var_compiler in zip(configuration.ListOfSlaves[0::2], configuration.ListOfSlaves[1::2]):
+  for var in var_compiler[:]:
+    if var == 'visualstudio_2013':
+      SlaveNameList_visualstudio_2013.append(var_name[0])
