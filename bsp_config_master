@@ -1,32 +1,63 @@
 # -*- python -*-
 # ex: set syntax=python:
-# 'master.cfg'
 
 from buildbot.plugins import *
+
 import configuration
+
 
 # master config object
 c = BuildmasterConfig = {}
+
 
 # buildslaves
 c['slaves'] = []
 for var in configuration.ListOfSlaves[0::2]:
   c['slaves'].append(buildslave.BuildSlave(var[0],var[1]))
 
-SlaveNameList_matlab_2014b = []
-for var_name, var_compiler in zip(configuration.ListOfSlaves[0::2], configuration.ListOfSlaves[1::2]):
-  for var in var_compiler[:]:
-    if var == 'matlab_2014b':
-      SlaveNameList_matlab_2014b.append(var_name[0])
+c['protocols'] = {'pb': {'port': 9989}}
 
-SlaveNameList_gcc = []
-for var_name, var_compiler in zip(configuration.ListOfSlaves[0::2], configuration.ListOfSlaves[1::2]):
-  for var in var_compiler[:]:
-    if var == 'gcc':
-      SlaveNameList_gcc.append(var_name[0])
 
-SlaveNameList_visualstudio_2013 = []
+# builders and factories
+## compiler specific 'SlaveNameList's
+SlaveNameList = []
 for var_name, var_compiler in zip(configuration.ListOfSlaves[0::2], configuration.ListOfSlaves[1::2]):
   for var in var_compiler[:]:
-    if var == 'visualstudio_2013':
-      SlaveNameList_visualstudio_2013.append(var_name[0])
+    if var == configuration.Compiler[0]:
+      SlaveNameList.append(var_name[0])
+
+## compiler specific build factory
+factory = util.BuildFactory()
+factory.addStep(steps.Git(repourl=configuration.SourceUrl, mode='incremental'))
+if 'matlab' in configuration.Compiler[0]:
+  # matlab specific build steps
+  factory.addStep(steps.ShellCommand(command=["trial", "pyflakes"])) 
+elif 'visualstudio' in configuration.Compiler[0]:
+  # visualstudio specific build steps
+  factory.addStep(steps.ShellCommand(command=["trial", "pyflakes"]))
+elif 'gcc' in configuration.Compiler[0]:
+  # gcc specific build steps
+  factory.addStep(steps.ShellCommand(command=["trial", "pyflakes"]))
+
+## compiler specific builder
+c['builders'] = []
+c['builders'].append(util.BuilderConfig(name=configuration.Compiler[0],
+	             slavenames=SlaveNameList,
+      		     factory=factory))
+
+
+# changesources
+c['change_source'] = []
+c['change_source'].append(changes.GitPoller(
+        configuration.IniUrl,
+        workdir='gitpoller-workdir', branch='master',
+        pollinterval=6))
+
+
+# compiler specific scheduler
+c['schedulers'] = []
+c['schedulers'].append(schedulers.SingleBranchScheduler(
+                            name="all",
+                            change_filter=util.ChangeFilter(branch='master'),
+                            treeStableTimer=None,
+                            builderNames=[configuration.Compiler[0]]))
